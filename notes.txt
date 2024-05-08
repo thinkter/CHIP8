@@ -1,0 +1,28 @@
+Chip8 is like this really old interpreter used in old computers in the 80s 
+
+
+4KB of ram (4096 bytes) of from 0x000 to 0xFFF
+
+
+first 512 bytes are used by are used by the interpreter 0x000 to 0x1FF
+
+
+most chip8 programs should start at 0x200 
+
+so all of our ram will be 0x200 to 0xFFF ( 512 to 4096)
+
+dont know what a register is
+
+chip8 has 16 8bit registers refered to as Vx where x is hexadecimal
+
+theres some 16bit register called I apparently duno what that is
+
+the program counter should be 16 bit
+the stack pointer can be 8 bit its used to point the topmost lvl of the stack 
+
+stack is an array of 16 16 bit values. chip8 allows for up to 16 levels of nested subroutines
+
+we have a hexadecimal keypad as inputs form 0 to F
+
+
+

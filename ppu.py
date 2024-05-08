@@ -1,6 +1,11 @@
 # Example file showing a basic pygame "game loop"
 import pygame
 
+import keyboard as k
+
+r = k.KEY_MAPPINGS
+
+
 # pygame setup
 pygame.init()
 screen = pygame.display.set_mode((1024, 512))
