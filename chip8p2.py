@@ -1,5 +1,8 @@
 import sys
 
+import ppu
+
+
 class Chip8():
     memory = [0] * 4096
     reg = [0]* 16 
