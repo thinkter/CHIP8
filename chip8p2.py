@@ -30,8 +30,7 @@ class Chip8():
            0xF0, 0x80, 0xF0, 0x80, 0x80  # F
            ]
     
-#   push this to the initializing part
-    
+#   push this to the initializing part    
     for i in range(0,80):
         memory[i] = fonts[i]
 
@@ -41,5 +40,4 @@ class Chip8():
         for i in range(len(binary)):
             self.memory[0x200 + i] = binary[i]
 
-    def cycle(self):
-            
+#    def cycle(self):            

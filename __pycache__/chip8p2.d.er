@@ -1,0 +1,19 @@
+##[pylyzer] failed /home/ashmans/Documents/COMPUTERSCI/CHIP8/chip8p2.py 1728395300 1275
+.sys: Never
+
+.Chip8: ClassType
+.Chip8.__call__: () -> chip8p2.Chip8
+.Chip8.memory: Never
+.Chip8.reg: Never
+.Chip8.display: Never
+.Chip8.key_inputs: Never
+.Chip8.soundTimer: {0}
+.Chip8.delayTimer: {0}
+.Chip8.index: {0}
+.Chip8.pc: {0}
+.Chip8.stack: List!(Never, 0)
+.Chip8.opcode: {0}
+.Chip8.shouldDraw: {False}
+.Chip8.fonts: List!({224, 240, 144, 32, 96, 112, 16, 128, 64}, 80)
+.Chip8.loadRom: (self: chip8p2.Chip8, rom_path: PathLike) -> NoneType
+

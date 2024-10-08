@@ -1,0 +1,16 @@
+##[pylyzer] failed /home/ashmans/Documents/COMPUTERSCI/CHIP8/ppu.py 1728394274 1214
+.pygame: Never
+
+.k = pyimport "keyboard"
+.keyboard = pyimport "keyboard"
+
+.r: Never
+
+.screen: Never
+.clock: Never
+.running: {True}
+.Drawpixel: (x: Structural({.__mul__ = (self: Never, Nat) -> Nat}), y: Structural({.__mul__ = (self: Never, Nat) -> Nat})) -> Never
+.Deletepixel: (x: Structural({.__mul__ = (self: Never, Obj) -> Never}), y: Structural({.__mul__ = (self: Never, Obj) -> Never})) -> Never
+.clear: () -> NoneType
+
+
