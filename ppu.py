@@ -1,7 +1,6 @@
 # Example file showing a basic pygame "game loop"
 import pygame
-
-
+import random as r
 
 #=========================KEYBOARD==============================================
 class Keyboard():
@@ -33,6 +32,7 @@ class Keyboard():
 
 #============================CHIP8 DEFINATIONS=======================
 
+keysPressed = Keyboard.keysPressed
 class Chip8():
     memory = [0] * 4096
     reg = [0]* 16 
@@ -89,58 +89,99 @@ class Chip8():
                 stack.append(pc)
                 pc = opcode & 0x0fff
             case 0x3000:
-                print("ga")
+                if reg[x] == (opcode & 0xff):
+                    pc = pc + 2
             case 0x4000:
-                print("Asd")
+                if reg[x] != (opcode & 0xff):
+                    pc = pc + 2
             case 0x5000:
-                print("ads")
+                if reg[x] == reg[y]:
+                    pc = pc + 2
             case 0x6000:
-                print("asdasd")
+                reg[x] = (opcode & 0xff)
             case 0x7000:
-                print("asdasd")
+                reg[x] = reg[x] + (opcode & 0xff)
             case 0x8000:
                 match opcode & 0xf:
                     case 0x0:
-                        print("asdasd")
+                        reg[x] = reg[y]
                     case 0x1:
-                        print("asdasd")
+                        reg[x] = reg[x] or reg[y]
                     case 0x2:
-                        print("asdasd")
+                        reg[x] = reg[x] and reg[y]
                     case 0x3:
-                        print("asds")
+                        reg[x] = reg[x] ^ reg[y]
                     case 0x4:
-                        print("asdasd")
+                        sum = reg[x] + reg[y]
+
+                        reg[0xf] = 0
+
+                        if sum > 0xff:
+                            reg[0xf] = 1
+                        reg[x] = sum
                     case 0x5:
-                        print("asd")
+                        reg[0xf] = 0
+                        if reg[x] > reg[y]:
+                            reg[0xf] = 1
+                        reg[x] = reg[x] - reg[y]
                     case 0x6:
-                        print("Asd")
+                        reg[0xf] = reg[x] & 1
+                        reg[x] = reg[x] >> 1
                     case 0x7:
-                        print("asd")
+                        reg[0xf] = 0
+
+                        if reg[y] > reg[x]:
+                            reg[0xf] = 1
+
+                        reg[x] = reg[y] - reg[x]
                     case 0xE:
-                        print("asd")
+                        reg[0xf] = reg[x] & 0x80
+                        reg[x] = reg[x] << 1
             case 0x9000:
-                print("asd")
+                if reg[x] != reg[y]:
+                    pc = pc + 2
             case 0xA000:
-                print("asd")
+                index = opcode & 0xfff
             case 0xB000:
-                print("asd")
+                pc = (opcode & 0xfff) + reg[0]
             case 0xC000:
-                print("asd")
+                rand = r.randint(0,255) * 0xff
+
+                reg[x] = rand & (opcode & 0xff)
             case 0xD000:
-                print("asd")
+                #draw vx, vy, nibble
+                width = 8
+                height = opcode & 0xf
+
+                reg[0xf] = 0
+                row = 0
+                while row<height:
+                    row = row + 1
+                    sprite = memory[index + row]
+
+                    col = 0
+                    while col<width:
+                        col = col + 1
+                        if (sprite & 0x80) > 0:
+                            if (Drawpixel(reg[x] + col, reg[y] + row)):
+                                reg[0xf] = 1
+
+                        sprite = sprite << 1
             case 0xE000:
-                print("asd")
                 match opcode & 0xff:
                     case 0x9E:
-                        print("asd")
+                        pc = pc + 2
                     case 0xA1:
-                        print("asd")
+                        if(keysPressed[reg[x]] == 0):
+                            pc = pc + 2
             case 0xF000:
                 match opcode & 0xff:
                     case 0x07:
-                        print("asd")
+                        reg[x] = delayTimer
                     case 0x0A:
-                        print("print")
+                        paused = True
+
+
                     case 0x15:
                         print("asd")
                     case 0x18:
@@ -224,7 +265,6 @@ screen = pygame.display.set_mode((1024, 512))
 clock = pygame.time.Clock()
 running = True
 fps = 60
-keysPressed = Keyboard.keysPressed
 
 mem = Chip8.memory
 Chip8().loadRom("TETRIS")
