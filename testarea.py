@@ -15,17 +15,10 @@
 
 #print(memory)
 
-a = input("enter a number")
+a = int(input("enter a number"))
 
-match a:
-    case 0x1000:
-        print("gay")
-
-    case 2:
-        print("gaygay")
-    case 3:
-        print("gaygaygay")
-    case 4:
-        print("gaygaygaygay")
-    case _:
-        print("askdaksjdkadskamsoidaoiwn")
+global c = 10
+def ash():
+    c = c + 2
+    print(c)
+ash()
