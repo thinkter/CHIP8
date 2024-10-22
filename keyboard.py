@@ -29,13 +29,38 @@ KEY_MAPPINGS = {
 pygame.init()
  
 # creating display
-display = pygame.display.set_mode((300, 300))
- 
-fps = 60
-# creating a running loop
-while True:
-    fpsInterval = 1000/fps
+display = [0] * 64 * 32
+screen = pygame.display.set_mode((1024, 512))
+clock = pygame.time.Clock()
+def Drawpixel(x,y):
+    PIXEL_ON = pygame.Rect(x * 16, y * 16 , 16, 16 ) #each pixle from the 64*32 is rescaled to 1024 * 512
+    pygame.draw.rect(screen, "white", PIXEL_ON)
+    if x > 64:
+        x = x - 64
+    elif x < 0:
+        x = 64 + x
+    if y > 32:
+        y = y - 32
+    elif y < 0:
+        y = 32 + y
 
+    pixelLoc = x + (y*64) 
+    display[pixelLoc] = display[pixelLoc] ^ 1
+
+
+
+def CLS():
+    display = [0] * 64 * 32
+#    for i in range(0, 64):
+#        for j in range(0, 32):
+#            PIXEL_ON = pygame.Rect(i * 16, j * 16 , 16, 16 ) #each pixle from the 64*32 is rescaled to 1024 * 512
+#            pygame.draw.rect(screen, "black", PIXEL_ON)
+
+# creating a running loop
+Drawpixel(63 ,31)
+while True:
+
+    #screen.fill("black")
     
     # creating a loop to check events that
     # are occurring
@@ -50,6 +75,15 @@ while True:
 
             if key in KEY_MAPPINGS:
                 print("haah") 
+                PIXEL_ON = pygame.Rect(63 * 16, 31 * 16 , 16, 16 ) #each pixle from the 64*32 is rescaled to 1024 * 512
+                pygame.draw.rect(screen, "black", PIXEL_ON)
             # if keydown event happened
             # than printing a string to output
             print("A key has been pressed")
+
+
+    
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()

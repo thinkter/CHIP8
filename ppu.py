@@ -40,6 +40,7 @@ display = [0] * 64*32
 key_inputs = [0]*16
 soundTimer = 0
 delayTimer = 0
+pc = 0
 index = 0
 stack = []
 opcode = 0
@@ -64,14 +65,14 @@ fonts = [0xF0, 0x90, 0x90, 0x90, 0xF0, # 0
        0xF0, 0x80, 0xF0, 0x80, 0x80  # F
        ]
 
-#  push this to the initializing part    
-for i in range(0,80):
-    memory[i] = fonts[i]
+START_ADDRESS = 0x200
+FONT_START_ADDRESS = 0x50
 
-pc = 0x200
-
+j = 0
+while j < 80:
+    memory[FONT_START_ADDRESS + j] = fonts[j]
+    j += 1
 def executeInstruction(_opcode = 0):
-    global pc
     pc = 0x200
     pc = pc + 2
     x = (_opcode and 0x0f00) >> 8
@@ -278,10 +279,11 @@ running = True
 fps = 60
 
 
+
 loadRom("TETRIS")
 
 fpsInterval = 1000/fps
-
+screen.fill("black")
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
@@ -301,7 +303,7 @@ while running:
                 print(keysPressed)
 
     # fill the screen with a color to wipe away anything from last frame
-    screen.fill("black")
+
     # RENDER YOUR GAME HERE
     #Drawpixel(1, 1) # any pixel you want just multiply it with 16
     # flip() the display to put your work on screen
