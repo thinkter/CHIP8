@@ -60,51 +60,202 @@ while j < 80:
     j += 1
 
 
-#6XNN (set register VX) done
-#1NNN (jump) done
+#6XNN (set register VX) done registers storing is working
+#1NNN (jump) idk
 #00E0 (clear screen) done
 #7XNN (add value to register VX) done
-#ANNN (set index register I) done
-#DXYN (display/draw) ig done? gotta figure it outtt
+#ANNN (set index register I) actually works 
+#DXYN (display/draw) i
 
 def CLS():
     display = [0] * 64 * 32
     screen.fill("black")   
 
-def JMP():
+def JMP(opcode):
     #jump location to NNN
     #interpreter sets pc to nnn
-    addr = opcode and 0x0FFF
+    addr = opcode &  0x0FFF
+    return addr
+    #pc = addr
 
-    pc = addr
-
-def OP_6xkk():
+def OP_6xkk(opcode):
     # puts kk into register x
-    Vx = (opcode and 0x0f00) >> 8
-    byte = opcode and 0x00ff
+    global registers
+    Vx = (opcode & 0x0f00) >> 8
+    byte = opcode & 0x00ff
 
     registers[Vx] = byte
+    #print(hex(byte))
+    #print(registers)
 
-def OP_7xkk():
-    Vx = (opcode and 0x0f00) >> 8
-    byte = opcode and 0x00ff
-
+def OP_7xkk(opcode):
+    global registers
+    Vx = (opcode & 0x0f00) >> 8
+    byte = opcode & 0x00ff
     registers[Vx] += byte
-def OP_Annn():
-    addr = opcode and 0x0fff
-    index = addr
+    #print(hex(byte))
+    #print(registers)
+def OP_Annn(opcode):
+    addr = opcode & 0x0fff
+    return addr
+    #print(hex(index))
 
+
+# ADD THESE TO THE cycle
+    
+def OP_Call(opcode):
+    #2nnn
+    global pc
+    global stack
+    global sp
+    stack[sp] = pc
+    sp = sp + 1 
+    pc = (opcode & 0xfff)
+
+
+def OP_RET(opcode):
+    global sp
+    global pc
+    sp = sp - 1
+    stack[sp] = pc
+
+def OP_3xkk(opcode):
+    global pc
+    Vx = (opcode & 0x0f00) >> 8
+    kk = opcode & 0xff
+
+    if (Vx == kk):
+        pc = pc + 2
+def OP_4xkk(opcode):
+    global pc
+
+    Vx = (opcode & 0x0f00) >> 8
+    kk = opcode & 0xff
+
+    if(Vx != kk):
+        pc = pc + 2
+
+def OP_5xy0(opcode):
+    global pc
+
+    vx = (opcode & 0x0f00 )>> 8
+    vy = (opcode & 0x00f0) >> 4
+
+    if vx == vy:
+        pc = pc + 2
+def OP_8xy0(opcode):
+    global registers
+
+    Vx = (opcode & 0x0f00) >> 8
+    Vy = (opcode & 0x00f0) >> 4
+
+    registers[Vx] = registers[Vy]
+def OP_8xy1(opcode):
+    global registers 
+    Vx = (opcode & 0x0f00) >> 8
+    Vy = (opcode & 0x00f0) >> 4
+
+    registers[Vx] = registers[Vx] | registers[Vy]
+def OP_8xy2(opcode):
+    global registers 
+    Vx = (opcode & 0x0f00) >> 8
+    Vy = (opcode & 0x00f0) >> 4
+
+    registers[Vx] = registers[Vx] & registers[Vy]
+def OP_8xy3(opcode):
+    global registers 
+    Vx = (opcode & 0x0f00) >> 8
+    Vy = (opcode & 0x00f0) >> 4
+
+    registers[Vx] = registers[Vx] ^ registers[Vy]
+def OP8xy4(opcode):
+    global registers 
+    Vx = (opcode & 0x0f00) >> 8
+    Vy = (opcode & 0x00f0) >> 4
+    x = registers[Vx]
+    y = registers[Vy]
+
+    registers[0xf] = 0
+    add = x + y
+
+    if add > 255:
+        registers[0xf] = 1
+    registers[Vx] = add
+
+def OP_8xy5(opcode):
+    global registers 
+    Vx = (opcode & 0x0f00) >> 8
+    Vy = (opcode & 0x00f0) >> 4
+    x = registers[Vx]
+    y = registers[Vy]
+    registers[0xf] = 0
+ 
+    registers[Vx] = x - y
+
+    if(x > y):
+        registers[0xf] = 1
+def OP_8xy6(opcode):
+    global registers 
+    Vx = (opcode & 0x0f00) >> 8
+    Vy = (opcode & 0x00f0) >> 4
+    x = registers[Vx]
+    y = registers[Vy]
+
+    registers[0xf] = registers[Vx] & 0x1
+    registers[Vx] = registers[Vy]
+
+    registers[Vx] = registers[Vx] > 1
+def OP_8xy7(opcode):
+
+def setPixel(x, y):
+    if x > 64:
+        x = x - 64
+    elif x < 0:
+        x = 64 + x
+    if y > 32:
+        y = y - 32
+    elif y < 0:
+        y = 32 + y
+    display[x + (y * 64)] ^= 1
+    return display[x + (y * 64)] != 1
 
 #this shit is incomplete
 #figure out the draw and few more opcodes and then figure out cycle and other shit
-def Draw():
-    Vx = (opcode and 0x0f00) >> 8
-    Vy = (opcode and 0x00f0) >> 4
-    height = opcode and 0x000f
+#nah this shit is dumb as fuck gotta remake this goddamn bull shit
 
+def Draw(opcode):
+    global registers
+    global memory
+    global index
+    Vx = (opcode & 0x0f00) >>  8
+    Vy = (opcode & 0x00f0) >> 4 
+    height = opcode & 0x000f
+    width = 8
+    registers[0xf] = 0
+    col = 8 
+    row = 0
+    while row < height:
+        row = row + 1
+        sprite = memory[index + row]
+        col = 0
+        while col < width:
+            col = col + 1 
+            if (sprite & 0x80) > 0 :
+                if(setPixel(registers[Vx] + col , registers[Vy] + row )):
+                    registers[0xf] = 1
+            sprite = sprite << 1
+"""
+def Draw(opcode):
+
+    global registers
+    global display
+    Vx = (opcode & 0x0f00) >> 8
+    Vy = (opcode & 0x00f0) >> 4
+    height = opcode & 0x000f
+#    print(height, "height")
     xPos = registers[Vx] % 64
     yPos = registers[Vy] % 32
-
+#    print(xPos , "XPOS" , yPos, "YPOS")
     registers[0xF] = 0
 
     row = 0
@@ -113,9 +264,10 @@ def Draw():
         spriteByte = memory[index + row]
 
         col = 0
-        while col > 8:
+        while col < 8:
             col += 1
-            spritePixel = spriteByte and (0x80 >> col)
+            spritePixel = spriteByte & (0x80 >> col)
+            print(display[(yPos + row) * 64 + (xPos + col)])
             screenPixel = display[(yPos + row) * 64 + (xPos + col)]
             
             if(spritePixel):
@@ -123,6 +275,7 @@ def Draw():
                     registers[0xf] = 1
 
                 screenPixel = screenPixel ^ 0xFFFFFFFF
+"""
 
 def loadRom(rom_path):
     binary = open(rom_path , "rb").read()
@@ -133,43 +286,53 @@ def Drawpixel(x,y):
     PIXEL_ON = pygame.Rect(x * 16, y * 16 , 16, 16 ) #each pixel from the 64*32 is rescaled to 1024 * 512
     pygame.draw.rect(screen, "white", PIXEL_ON)
 
-def cycle(pc):
+def cycle():
+    global index
+    global pc
     opcode = memory[pc] << 8 | memory[pc + 1]
     #print(memory[pc])
     #print(memory[pc])
-    time.sleep(0.1)
-
+    #time.sleep(0.1)
+    pc = pc + 2
     print(hex(opcode))
    # print(hex(pc))
     if opcode == 0x00e0:
         CLS()
         print("CLS")
-    elif (opcode and 0xF000) == 0x1000:
-        #JUMP
-        JMP()
-        print("JMP")
-    elif (opcode and 0xF000) == 0x6000:
-        #set register
-        OP_6xkk()
-        print("6XNN")
-    elif (opcode and 0xF000) == 0x7000:
-        #add value to register
-        OP_7xkk()
-        print("7XNN")
-    elif (opcode and 0xf0) == 0xa0:
+   
+    elif (opcode & 0xf000) == 0xa000:
         #set index register
-        OP_Annn()
+        #OP_Annn(opcode, index)
+        index = OP_Annn(opcode)
+        #print(hex(index))
         print("ANNN")
+    elif (opcode & 0xF000) == 0x1000:
+        #JUMP
+        pc = JMP(opcode)
+        print("JMP")
+    elif (opcode & 0xF000) == 0x6000:
+        #set register
+        OP_6xkk(opcode)
+        print("6XNN")
+    elif (opcode & 0xF000) == 0x7000:
+        #add value to register
+        OP_7xkk(opcode)
+        print("7XNN")
+    elif(opcode & 0xF000) == 0xD000:
+        #draw
+        Draw(opcode)
+        print("DXYN")
+
 
 running = True
 screen.fill("black")
 #Drawpixel(10,10)
 
-#loadRom("IBM Logo.ch8")
+loadRom("IBM Logo.ch8")
+#memory[0x201] = 0xe0
 
-
-memory[0x201]= 0xa2
 pc = START_ADDRESS
+sp = 0 
 while running:
     
     #figure out how to keep checking display for changes and draw the pixels which get updated in it
@@ -185,9 +348,13 @@ while running:
             y = i // 64
             x = i -(y * 64)
             Drawpixel(x,y)
-
-    cycle(pc)
-    pc = pc + 2  
+    #print(hex(index))
+#    print(hex(pc))
+    print(registers)
+    #for j in display:
+    #    if j == 1:
+    #        print(j , "a pixel has been active")
+    cycle()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
