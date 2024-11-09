@@ -206,6 +206,52 @@ def OP_8xy6(opcode):
 
     registers[Vx] = registers[Vx] > 1
 def OP_8xy7(opcode):
+    global registers 
+    Vx = (opcode & 0x0f00) >> 8
+    Vy = (opcode & 0x00f0) >> 4
+    x = registers[Vx]
+    y = registers[Vy]
+
+    registers[Vx] = y- x
+    registers[0xf] = 0
+
+    if y > x:
+        registers[0xf] = 1
+def OP_8xyE(opcode):
+    global registers 
+    Vx = (opcode & 0x0f00) >> 8
+    Vy = (opcode & 0x00f0) >> 4
+    x = registers[Vx]
+    y = registers[Vy]
+    registers[0xf] = (x & 0x80)
+
+    registers[Vx] = x << 1
+
+def OP_9xy0(opcode):
+    global registers 
+    global pc
+    Vx = (opcode & 0x0f00) >> 8
+    Vy = (opcode & 0x00f0) >> 4
+    x = registers[Vx]
+    y = registers[Vy]
+
+    if x != y:
+        pc = pc + 2
+
+def OP_Bnnn(opcode):
+    global registers
+    global pc
+    n = opcode & 0xfff
+    pc = n + registers[0]
+
+def OP_Cxkk(opcode):
+    global registers
+    k = opcode & 0xff
+    Vx = (opcode & 0xf00) >> 8
+    registers[Vx] = r.randint(0,255) & k
+
+def OP_Ex9E(opcode):
+
 
 def setPixel(x, y):
     if x > 64:
