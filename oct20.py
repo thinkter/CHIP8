@@ -33,9 +33,9 @@ fonts = [0xF0, 0x90, 0x90, 0x90, 0xF0, # 0
        ]
 
 KEY_MAPPINGS = {
-    pygame.K_q : 0x1,
-    pygame.K_w : 0x2,
-    pygame.K_e : 0x0,
+    pygame.K_q : 0x0,
+    pygame.K_w : 0x1,
+    pygame.K_e : 0x2,
     pygame.K_r : 0x3,
     pygame.K_t : 0x4,
     pygame.K_y : 0x5,
@@ -244,6 +244,7 @@ def OP_Bnnn(opcode):
     n = opcode & 0xfff
     pc = n + registers[0]
 
+
 def OP_Cxkk(opcode):
     global registers
     k = opcode & 0xff
@@ -251,8 +252,22 @@ def OP_Cxkk(opcode):
     registers[Vx] = r.randint(0,255) & k
 
 def OP_Ex9E(opcode):
-
-
+    global pc
+    Vx = (opcode & 0x0f00) >> 8
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            key = event.key
+            if hex(KEY_MAPPINGS[key]) == Vx:
+                pc = pc + 2
+def OP_ExA1(opcode):
+    global pc
+    Vx = (opcode & 0x0f00) >> 8
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            key = event.key
+            if hex(KEY_MAPPINGS[key]) != Vx:
+                pc = pc + 2
+d
 def setPixel(x, y):
     if x > 64:
         x = x - 64
@@ -340,7 +355,7 @@ def cycle():
     #print(memory[pc])
     #time.sleep(0.1)
     pc = pc + 2
-    print(hex(opcode))
+    #print(hex(opcode))
    # print(hex(pc))
     if opcode == 0x00e0:
         CLS()
@@ -396,7 +411,7 @@ while running:
             Drawpixel(x,y)
     #print(hex(index))
 #    print(hex(pc))
-    print(registers)
+    #print(registers)
     #for j in display:
     #    if j == 1:
     #        print(j , "a pixel has been active")
@@ -407,7 +422,7 @@ while running:
         if event.type == pygame.KEYDOWN:
             key = event.key
             if key in KEY_MAPPINGS:
-                print("maa chudao maa chudao garam hai garma hai")
+                print("inputted " , hex(KEY_MAPPINGS[key]))
     pygame.display.flip()
     clock.tick(fps)
 
