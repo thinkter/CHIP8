@@ -7,9 +7,12 @@ registers = [0] * 16
 stack = [0] * 16
 keypad = [0] * 16
 opcode = 0
+paused = False
 screen = pygame.display.set_mode((1024, 512))
 clock = pygame.time.Clock()
 fps = 60
+delayTimer = 0
+soundTimer = 0
 index = 0
 memory = [0] * 4096
 randByte = r.randint(0, 255)
@@ -114,6 +117,7 @@ def OP_Call(opcode):
 
 
 def OP_RET(opcode):
+    #00EE
     global sp
     global pc
     sp = sp - 1
@@ -168,7 +172,10 @@ def OP_8xy3(opcode):
     Vy = (opcode & 0x00f0) >> 4
 
     registers[Vx] = registers[Vx] ^ registers[Vy]
-def OP8xy4(opcode):
+
+
+
+def OP_8xy4(opcode):
     global registers 
     Vx = (opcode & 0x0f00) >> 8
     Vy = (opcode & 0x00f0) >> 4
@@ -267,7 +274,76 @@ def OP_ExA1(opcode):
             key = event.key
             if hex(KEY_MAPPINGS[key]) != Vx:
                 pc = pc + 2
-d
+
+def OP_Fx07(opcode):
+    global registers
+    global delayTimer
+    Vx = (opcode & 0x0f00) >> 8
+    registers[Vx] = delayTimer
+
+def OP_Fx0A(opcode):
+    global paused
+    global registers
+    paused = True
+    Vx = (opcode & 0x0f00) >> 8
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            key = event.key
+            registers[Vx] = hex(KEY_MAPPINGS[key])
+            paused = False
+
+def OP_Fx15(opcode):
+    global registers
+    global delayTimer
+    Vx = (opcode & 0x0f00) >> 8
+    delayTimer = registers[Vx]
+
+def OP_Fx18(opcode):
+    global soundTimer
+    global registers
+    Vx = (opcode & 0x0f00) >> 8
+
+    registers[Vx] = soundTimer
+def OP_Fx1E(opcode):
+    global index
+    global registers
+    Vx = (opcode & 0x0f00) >> 8
+    index = index + registers[Vx]
+
+def OP_Fx29(opcode):
+    global index
+    global registers
+    Vx = (opcode & 0x0f00) >> 8
+
+    index = registers[Vx] * 5
+
+def OP_Fx33(opcode):
+    global memory
+    global index
+    global registers
+    Vx = (opcode & 0x0f00) >> 8
+    memory[index] = registers[Vx] // 100
+    memory[index + 1] = (registers[Vx] // 10) % 10
+    memory[index + 2] = registers[Vx] % 10
+
+def OP_Fx55(opcode):
+    global index
+    global memory
+    global registers
+
+    Vx = (opcode & 0x0f00) >> 8
+    for j in range(0, Vx):
+        memory[index + j] = registers[j]
+
+def OP_Fx65(opcode):
+    global index
+    global registers
+    global memory
+
+    Vx = (opcode & 0x0f00) >> 8
+
+    for j in range(0, Vx):
+        registers[j] = memory[index + j]
 def setPixel(x, y):
     if x > 64:
         x = x - 64
@@ -279,17 +355,11 @@ def setPixel(x, y):
         y = 32 + y
     display[x + (y * 64)] ^= 1
     return display[x + (y * 64)] != 1
-
 #this shit is incomplete
-#figure out the draw and few more opcodes and then figure out cycle and other shit
-#nah this shit is dumb as fuck gotta remake this goddamn bull shit
-
-def Draw(opcode):
+def Draw(opcode, Vx,Vy):
     global registers
     global memory
     global index
-    Vx = (opcode & 0x0f00) >>  8
-    Vy = (opcode & 0x00f0) >> 4 
     height = opcode & 0x000f
     width = 8
     registers[0xf] = 0
@@ -381,15 +451,88 @@ def cycle():
         print("7XNN")
     elif(opcode & 0xF000) == 0xD000:
         #draw
-        Draw(opcode)
+        Vx = (opcode & 0x0f00) >>  8
+        Vy = (opcode & 0x00f0) >> 4 
+ 
+        Draw(opcode, Vx, Vy)
         print("DXYN")
-
+    elif(opcode & 0xF000) == 0x2000:
+        OP_Call(opcode)
+        print("2nnn")
+    elif(opcode & 0xF000) == 0x00EE:
+        OP_RET(opcode)
+        print("00EE")
+    elif(opcode & 0xF000) == 0x3000:
+        OP_3xkk(opcode)
+        print("3xkk")
+    elif(opcode & 0xF000) == 0x4000:
+        OP_4xkk(opcode)
+        print("4xkk")
+    elif(opcode & 0xF000) == 0x5000:
+        OP_5xy0(opcode)
+        print("5xy0")
+    elif(opcode & 0xF00F) == 0x8000:
+        OP_8xy0(opcode)
+        print("8xy0")
+    elif(opcode & 0xF00F) == 0x8001:
+        OP_8xy1(opcode)
+        print("8xy1")
+    elif(opcode & 0xF00F) == 0x8002:
+        OP_8xy2(opcode)
+        print("8xy2")
+    elif(opcode & 0xF00F) == 0x8003:
+        OP_8xy3(opcode)
+        print("8xy3")
+    elif(opcode & 0xF00F) == 0x8004:
+        OP_8xy4(opcode)
+        print("8xy4")
+    elif(opcode & 0xF00F) == 0x8005:
+        OP_8xy5(opcode)
+        print("8xy5")
+    elif(opcode & 0xF00F) == 0x8006:
+        OP_8xy6(opcode)
+        print("8xy6")
+    elif(opcode & 0xF00F) == 0x8007:
+        OP_8xy7(opcode)
+        print("8xy7")
+    elif(opcode & 0xF00F) == 0x800E:
+        OP_8xyE(opcode)
+        print("8xyE")
+    elif(opcode & 0xF00F) == 0x9000:
+        OP_9xy0(opcode)
+        print("9xy0")
+    elif(opcode & 0xF000) == 0xB000:
+        OP_Bnnn(opcode)
+    elif(opcode & 0xF000) == 0xC000:
+        OP_Cxkk(opcode)
+    elif(opcode & 0xF0FF) == 0xE09E:
+        OP_Ex9E(opcode)
+    elif(opcode & 0xF0FF) == 0xE0A1:
+        OP_ExA1(opcode)
+    elif(opcode & 0xF0FF) == 0xF007:
+        OP_Fx07(opcode)
+    elif(opcode & 0xF0FF) == 0xF00A:
+        OP_Fx0A(opcode)
+    elif(opcode & 0xF0FF) == 0xF015:
+        OP_Fx15(opcode)
+    elif(opcode & 0xF0FF) == 0xF018:
+        OP_Fx18(opcode)
+    elif(opcode & 0xF0FF) == 0xF01E:
+        OP_Fx1E(opcode)
+    elif(opcode & 0xF0FF) == 0xF029:
+        OP_Fx29(opcode)
+    elif(opcode & 0xF0FF) == 0xF033:
+        OP_Fx33(opcode)
+    elif(opcode & 0xF0FF) == 0xF055:
+        OP_Fx55(opcode)
+    elif(opcode & 0xF0FF) == 0xF065:
+        OP_Fx65(opcode)
 
 running = True
 screen.fill("black")
 #Drawpixel(10,10)
 
-loadRom("IBM Logo.ch8")
+loadRom("3-corax+.ch8")
 #memory[0x201] = 0xe0
 
 pc = START_ADDRESS
