@@ -344,6 +344,9 @@ def OP_Fx65(opcode):
 
     for j in range(0, Vx):
         registers[j] = memory[index + j]
+
+#formulae display index = x + (y-1) * 64
+
 def setPixel(x, y):
     if x > 64:
         x = x - 64
@@ -353,8 +356,9 @@ def setPixel(x, y):
         y = y - 32
     elif y < 0:
         y = 32 + y
-    display[x + (y * 64)] ^= 1
-    return display[x + (y * 64)] != 1
+    hahahaha = x + ((y-1) * 64)
+    display[hahahaha] ^= 1
+    return display[hahahaha] != 1
 #this shit is incomplete
 def Draw(opcode, Vx,Vy):
     global registers
