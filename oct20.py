@@ -93,11 +93,12 @@ def OP_6xkk(opcode):
 
 def OP_7xkk(opcode):
     global registers
-    Vx = (opcode & 0x0f00) >> 8
-    byte = opcode & 0x00ff
-    registers[Vx] += byte
-    #print(hex(byte))
-    #print(registers)
+    x = (opcode & 0x0f00) >> 8
+    print(registers[x])
+    byte = opcode & 0xff
+    registers[x] = registers[x] + byte
+    print(registers[x])   
+
 def OP_Annn(opcode):
     addr = opcode & 0x0fff
     return addr
@@ -125,18 +126,21 @@ def OP_RET(opcode):
 
 def OP_3xkk(opcode):
     global pc
-    Vx = (opcode & 0x0f00) >> 8
-    kk = opcode & 0xff
+    x = (opcode & 0x0F00) >> 8
+    kk = opcode & 0xFF
 
-    if (Vx == kk):
+    if (registers[x] == kk):
+        print("yay")
         pc = pc + 2
+
+        
 def OP_4xkk(opcode):
     global pc
 
-    Vx = (opcode & 0x0f00) >> 8
+    x = (opcode & 0x0f00) >> 8
     kk = opcode & 0xff
 
-    if(Vx != kk):
+    if(registers[x] != kk):
         pc = pc + 2
 
 def OP_5xy0(opcode):
@@ -182,11 +186,14 @@ def OP_8xy4(opcode):
     x = registers[Vx]
     y = registers[Vy]
 
-    registers[0xf] = 0
     add = x + y
-
+    
+    registers[0xF] = 0
     if add > 255:
         registers[0xf] = 1
+
+    if add > 255:
+        registers[0xF] = 1
     registers[Vx] = add
 
 def OP_8xy5(opcode):
@@ -360,25 +367,27 @@ def setPixel(x, y):
     display[hahahaha] ^= 1
     return display[hahahaha] != 1
 #this shit is incomplete
+
+
 def Draw(opcode, Vx,Vy):
     global registers
     global memory
     global index
-    height = opcode & 0x000f
+    height = opcode & 0xF
     width = 8
-    registers[0xf] = 0
+    registers[0xF] = 0
     col = 8 
     row = 0
     while row < height:
-        row = row + 1
         sprite = memory[index + row]
         col = 0
+        row = row + 1
         while col < width:
-            col = col + 1 
             if (sprite & 0x80) > 0 :
                 if(setPixel(registers[Vx] + col , registers[Vy] + row )):
                     registers[0xf] = 1
             sprite = sprite << 1
+            col = col + 1 
 """
 def Draw(opcode):
 
@@ -429,7 +438,7 @@ def cycle():
     #print(memory[pc])
     #time.sleep(0.1)
     pc = pc + 2
-    #print(hex(opcode))
+    print(hex(opcode))
    # print(hex(pc))
     if opcode == 0x00e0:
         CLS()
@@ -533,8 +542,8 @@ def cycle():
         OP_Fx65(opcode)
 
 running = True
+
 screen.fill("black")
-#Drawpixel(10,10)
 
 loadRom("3-corax+.ch8")
 #memory[0x201] = 0xe0
