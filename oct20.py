@@ -538,9 +538,9 @@ def cycle():
 running = True
 screen.fill("black")
 
-loadRom("4-flags.ch8")
+loadRom("3-corax+.ch8")
 #memory[0x201] = 0xe0
-
+print("hello")
 pc = START_ADDRESS
 sp = 0 
 while running:
