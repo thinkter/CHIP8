@@ -93,12 +93,11 @@ def OP_6xkk(opcode):
 
 def OP_7xkk(opcode):
     global registers
-    x = (opcode & 0x0f00) >> 8
-    print(registers[x])
-    byte = opcode & 0xff
-    registers[x] = registers[x] + byte
-    print(registers[x])   
-
+    Vx = (opcode & 0x0f00) >> 8
+    byte = opcode & 0x00ff
+    registers[Vx] += byte
+    #print(hex(byte))
+    #print(registers)
 def OP_Annn(opcode):
     addr = opcode & 0x0fff
     return addr
@@ -126,21 +125,18 @@ def OP_RET(opcode):
 
 def OP_3xkk(opcode):
     global pc
-    x = (opcode & 0x0F00) >> 8
-    kk = opcode & 0xFF
+    Vx = (opcode & 0x0f00) >> 8
+    kk = opcode & 0xff
 
-    if (registers[x] == kk):
-        print("yay")
+    if (Vx == kk):
         pc = pc + 2
-
-        
 def OP_4xkk(opcode):
     global pc
 
-    x = (opcode & 0x0f00) >> 8
+    Vx = (opcode & 0x0f00) >> 8
     kk = opcode & 0xff
 
-    if(registers[x] != kk):
+    if(Vx != kk):
         pc = pc + 2
 
 def OP_5xy0(opcode):
@@ -186,11 +182,9 @@ def OP_8xy4(opcode):
     x = registers[Vx]
     y = registers[Vy]
 
-    add = x + y
     
     registers[0xF] = 0
-    if add > 255:
-        registers[0xf] = 1
+    add = x + y
 
     if add > 255:
         registers[0xF] = 1
@@ -438,7 +432,7 @@ def cycle():
     #print(memory[pc])
     #time.sleep(0.1)
     pc = pc + 2
-    print(hex(opcode))
+    #print(hex(opcode))
    # print(hex(pc))
     if opcode == 0x00e0:
         CLS()
@@ -542,10 +536,9 @@ def cycle():
         OP_Fx65(opcode)
 
 running = True
-
 screen.fill("black")
 
-loadRom("3-corax+.ch8")
+loadRom("4-flags.ch8")
 #memory[0x201] = 0xe0
 
 pc = START_ADDRESS
